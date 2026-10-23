@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DJ Coiffeur</title>
+<style>
+  :root{
+    --bg:#0f0f12; --card:#1a1a20; --card2:#22222b;
+    --gold:#d4af37; --text:#f2f2f4; --muted:#9a9aa5; --green:#2ecc71; --red:#e74c3c;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{font-family:"Segoe UI",Tahoma,system-ui,sans-serif;background:var(--bg);color:var(--text);
+    min-height:100vh;display:flex;justify-content:center;padding:20px 16px 40px}
+  .app{width:100%;max-width:420px;position:relative}
+
+  .profile-card{background:linear-gradient(160deg,#20202a 0%,var(--card) 100%);
+    border:1px solid rgba(212,175,55,.25);border-radius:22px;padding:28px 20px 22px;
+    text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.45);position:relative}
+  .avatar-wrap{position:relative;width:120px;height:120px;margin:0 auto 14px;cursor:pointer}
+  .avatar{width:100%;height:100%;border-radius:50%;object-fit:cover;
+    border:3px solid var(--gold);box-shadow:0 6px 18px rgba(0,0,0,.5);display:block}
+  .online-dot{position:absolute;bottom:8px;inset-inline-start:8px;width:18px;height:18px;
+    border-radius:50%;background:var(--green);border:3px solid var(--card)}
+  .profile-name{font-size:22px;font-weight:700;letter-spacing:.3px}
+  .profile-role{color:var(--gold);font-size:14px;margin-top:4px}
+  .profile-meta{color:var(--muted);font-size:13px;margin-top:8px}
+  .stats{display:flex;justify-content:space-around;margin-top:20px;padding-top:18px;
+    border-top:1px solid rgba(255,255,255,.08)}
+  .stat b{display:block;font-size:18px;color:var(--gold)}
+  .stat span{font-size:12px;color:var(--muted)}
+
+  .sync{position:absolute;top:12px;inset-inline-end:14px;font-size:11px;color:var(--muted);
+    display:flex;align-items:center;gap:5px}
+  .sync i{width:7px;height:7px;border-radius:50%;background:var(--muted);display:block;font-style:normal}
+  .sync.on i{background:var(--green)}
+  .sync.off i{background:var(--red)}
+
+  .my-bookings{margin-top:20px}
+  .my-bookings h3{font-size:15px;color:var(--muted);margin:0 4px 10px;font-weight:600}
+  .bk{display:flex;align-items:center;gap:12px;background:var(--card);
+    border:1px solid rgba(46,204,113,.3);border-radius:16px;padding:13px 15px;margin-bottom:9px}
+  .bk .when{width:52px;flex:none;text-align:center;border-radius:11px;padding:6px 2px;
+    background:rgba(212,175,55,.12)}
+  .bk .when b{display:block;font-size:16px;color:var(--gold);line-height:1.2}
+  .bk .when small{font-size:10.5px;color:var(--muted)}
+  .bk .txt{flex:1;min-width:0}
+  .bk .txt b{display:block;font-size:14.5px}
+  .bk .txt span{font-size:12.5px;color:var(--muted)}
+  .bk .cancel{border:none;background:transparent;color:var(--red);cursor:pointer;
+    font-family:inherit;font-size:13px;padding:6px 4px;flex:none}
+  .bk.pending{border-color:rgba(212,175,55,.35)}
+  .bk .badge{font-size:10.5px;color:var(--gold)}
+
+  .tabs{display:flex;gap:8px;margin-top:22px;padding:6px;background:var(--card);
+    border-radius:16px;border:1px solid rgba(255,255,255,.07)}
+  .tab{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:13px 8px;
+    border:none;border-radius:12px;cursor:pointer;background:transparent;color:var(--muted);
+    font-family:inherit;font-size:15px;font-weight:600;transition:background .2s,color .2s}
+  .tab .ico{font-size:19px;line-height:1}
+  .tab[aria-selected="true"]{background:var(--gold);color:#17171c}
+
+  .panel{margin-top:16px}
+  .panel[hidden]{display:none}
+  .panel-title{font-size:15px;color:var(--muted);margin:0 4px 12px;
+    display:flex;justify-content:space-between;align-items:center}
+  .panel-title em{font-style:normal;color:var(--gold);font-size:13px}
+
+  .service{display:flex;align-items:center;gap:14px;background:var(--card);
+    border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:14px 16px;margin-bottom:10px;
+    cursor:pointer;transition:border-color .2s,background .2s}
+  .service:hover{border-color:rgba(212,175,55,.45)}
+  .service.selected{border-color:var(--gold);background:var(--card2)}
+  .service .emoji{width:44px;height:44px;flex:none;border-radius:12px;background:rgba(212,175,55,.12);
+    display:flex;align-items:center;justify-content:center;font-size:22px}
+  .service .info{flex:1;min-width:0}
+  .service .info b{display:block;font-size:15px;font-weight:600}
+  .service .info span{font-size:12.5px;color:var(--muted)}
+  .service .price{color:var(--gold);font-weight:700;font-size:16px;white-space:nowrap}
+
+  .book-bar{position:sticky;bottom:0;margin-top:18px;padding-top:10px;
+    background:linear-gradient(to top,var(--bg) 70%,transparent)}
+  .btn{width:100%;padding:15px;border:none;border-radius:14px;font-family:inherit;
+    font-size:16px;font-weight:700;cursor:pointer;background:var(--gold);color:#17171c}
+  .btn:disabled{background:#3a3a44;color:#7d7d88;cursor:not-allowed}
+  .btn:active:not(:disabled){transform:scale(.98)}
+  .btn-wa{background:#25D366;color:#0b2e17;margin-top:10px}
+  .btn-ghost{background:transparent;color:var(--muted);border:1px solid rgba(255,255,255,.12);margin-top:10px}
+
+  .screen{position:fixed;inset:0;background:var(--bg);z-index:50;overflow-y:auto;
+    padding:18px 16px 32px;display:none}
+  .screen.open{display:block}
+  .screen-inner{max-width:420px;margin:0 auto}
+  .screen-head{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+  .back{width:40px;height:40px;flex:none;border-radius:12px;border:1px solid rgba(255,255,255,.12);
+    background:var(--card);color:var(--text);font-size:20px;cursor:pointer;font-family:inherit}
+  .screen-head h2{font-size:19px;font-weight:700}
+  .screen-head .spacer{margin-inline-start:auto}
+
+  .recap{display:flex;align-items:center;gap:12px;background:var(--card);
+    border:1px solid rgba(212,175,55,.3);border-radius:16px;padding:14px 16px;margin-bottom:22px}
+  .recap .emoji{width:42px;height:42px;flex:none;border-radius:12px;background:rgba(212,175,55,.12);
+    display:flex;align-items:center;justify-content:center;font-size:21px}
+  .recap b{display:block;font-size:15px}
+  .recap span{font-size:12.5px;color:var(--muted)}
+  .recap .price{margin-inline-start:auto;color:var(--gold);font-weight:700}
+
+  .section-label{font-size:14px;color:var(--muted);margin:0 4px 10px}
+
+  .days{display:flex;gap:9px;overflow-x:auto;padding-bottom:8px;margin-bottom:22px}
+  .days::-webkit-scrollbar{display:none}
+  .day{flex:none;width:62px;padding:11px 4px;border-radius:14px;cursor:pointer;background:var(--card);
+    border:1px solid rgba(255,255,255,.07);text-align:center;font-family:inherit;color:var(--text)}
+  .day small{display:block;font-size:11.5px;color:var(--muted);margin-bottom:3px}
+  .day b{display:block;font-size:18px;font-weight:700;line-height:1.2}
+  .day i{display:block;font-style:normal;font-size:11px;color:var(--muted);margin-top:2px}
+  .day.selected{background:var(--gold);border-color:var(--gold)}
+  .day.selected small,.day.selected b,.day.selected i{color:#17171c}
+  .day.closed{opacity:.35;cursor:not-allowed}
+
+  .slots{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:22px}
+  .slot{padding:12px 2px;border-radius:12px;cursor:pointer;background:var(--card);
+    border:1px solid rgba(255,255,255,.07);color:var(--text);font-family:inherit;
+    font-size:14.5px;font-weight:600}
+  .slot.selected{background:var(--gold);border-color:var(--gold);color:#17171c}
+  .slot.taken{opacity:.3;cursor:not-allowed;text-decoration:line-through}
+  .slots-empty{color:var(--muted);font-size:14px;padding:10px 4px;margin-bottom:22px}
+
+  .field{margin-bottom:14px}
+  .field label{display:block;font-size:13.5px;color:var(--muted);margin:0 4px 6px}
+  .field input{width:100%;padding:14px 15px;border-radius:13px;background:var(--card);
+    border:1px solid rgba(255,255,255,.09);color:var(--text);font-family:inherit;font-size:15px}
+  .field input:focus{outline:none;border-color:var(--gold)}
+
+  .done{text-align:center;padding:30px 10px}
+  .done .check{width:76px;height:76px;margin:0 auto 18px;border-radius:50%;
+    background:rgba(46,204,113,.15);border:2px solid var(--green);
+    display:flex;align-items:center;justify-content:center;font-size:36px;color:var(--green)}
+  .done h3{font-size:21px;margin-bottom:8px}
+  .done p{color:var(--muted);font-size:14px;margin-bottom:22px}
+  .ticket{background:var(--card);border:1px solid rgba(212,175,55,.3);border-radius:16px;
+    padding:18px;text-align:start;margin-bottom:22px}
+  .ticket div{display:flex;justify-content:space-between;padding:9px 0;font-size:14.5px}
+  .ticket div+div{border-top:1px solid rgba(255,255,255,.07)}
+  .ticket span{color:var(--muted)}
+  .ticket b{font-weight:600}
+
+  /* لوحة التحكم */
+  .admin-stats{display:flex;gap:9px;margin-bottom:18px}
+  .astat{flex:1;background:var(--card);border:1px solid rgba(255,255,255,.07);
+    border-radius:14px;padding:13px 8px;text-align:center}
+  .astat b{display:block;font-size:19px;color:var(--gold)}
+  .astat span{font-size:11.5px;color:var(--muted)}
+  .daygroup{margin-bottom:20px}
+  .daygroup h4{font-size:14px;color:var(--gold);margin:0 4px 9px;font-weight:600}
+  .arow{display:flex;align-items:center;gap:12px;background:var(--card);
+    border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:12px 14px;margin-bottom:8px}
+  .arow .t{width:50px;flex:none;font-weight:700;color:var(--gold);font-size:14.5px}
+  .arow .d{flex:1;min-width:0}
+  .arow .d b{display:block;font-size:14px}
+  .arow .d span{font-size:12px;color:var(--muted)}
+  .arow .call{border:none;background:rgba(46,204,113,.14);color:var(--green);border-radius:10px;
+    padding:8px 11px;cursor:pointer;font-family:inherit;font-size:13px;flex:none}
+  .arow .del{border:none;background:transparent;color:var(--red);cursor:pointer;
+    font-family:inherit;font-size:13px;padding:6px 2px;flex:none}
+  .empty{color:var(--muted);font-size:14px;text-align:center;padding:40px 10px}
+
+  .note{margin-top:14px;font-size:12.5px;color:var(--muted);text-align:center;
+    background:rgba(231,76,60,.08);border:1px solid rgba(231,76,60,.25);
+    border-radius:12px;padding:10px 12px;display:none}
+  .note.show{display:block}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="profile-card">
+    <div class="sync" id="syncPill"><i></i><span id="syncTxt">محلي فقط</span></div>
+    <div class="avatar-wrap" id="avatarWrap">
+      <img class="avatar" alt="DJ Coiffeur" src="data:image/jpeg;base64,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">
+      <span class="online-dot"></span>
+    </div>
+    <h1 class="profile-name">DJ Coiffeur</h1>
+    <p class="profile-role">حلاق محترف &middot; باريس</p>
+    <p class="profile-meta">مفتوح اليوم &middot; 09:00 &ndash; 20:00</p>
+    <div class="stats">
+      <div class="stat"><b>+1200</b><span>زبون</span></div>
+      <div class="stat"><b>4.9</b><span>التقييم</span></div>
+      <div class="stat"><b>8</b><span>سنوات خبرة</span></div>
+    </div>
+    <button class="btn btn-wa" id="contactWa" style="margin-top:18px">تواصل معنا على واتساب</button>
+  </div>
+
+  <section class="my-bookings" id="myBookings" hidden>
+    <h3>مواعيدي القادمة</h3>
+    <div id="bkList"></div>
+  </section>
+
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" aria-selected="true"  aria-controls="panel-hommes"  id="tab-hommes">
+      <span class="ico">&#128104;</span> رجال
+    </button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="panel-enfants" id="tab-enfants">
+      <span class="ico">&#128102;</span> أطفال
+    </button>
+  </div>
+
+  <section class="panel" id="panel-hommes" role="tabpanel" aria-labelledby="tab-hommes">
+    <p class="panel-title">خدمات الرجال <em>من 16 سنة فما فوق</em></p>
+    <div class="service" data-price="20" data-dur="30"><div class="emoji">&#9986;</div><div class="info"><b>قصّة شعر</b><span>30 دقيقة</span></div><div class="price">20 &euro;</div></div>
+    <div class="service" data-price="12" data-dur="20"><div class="emoji">&#129526;</div><div class="info"><b>حلاقة اللحية</b><span>20 دقيقة</span></div><div class="price">12 &euro;</div></div>
+    <div class="service" data-price="28" data-dur="50"><div class="emoji">&#10024;</div><div class="info"><b>قصّة + لحية</b><span>50 دقيقة &middot; الأكثر طلباً</span></div><div class="price">28 &euro;</div></div>
+    <div class="service" data-price="15" data-dur="25"><div class="emoji">&#127746;</div><div class="info"><b>حلاقة بالموس</b><span>25 دقيقة</span></div><div class="price">15 &euro;</div></div>
+    <div class="service" data-price="35" data-dur="70"><div class="emoji">&#128142;</div><div class="info"><b>الباقة الكاملة</b><span>قصّة + لحية + غسيل + تصفيف</span></div><div class="price">35 &euro;</div></div>
+  </section>
+
+  <section class="panel" id="panel-enfants" role="tabpanel" aria-labelledby="tab-enfants" hidden>
+    <p class="panel-title">خدمات الأطفال <em>أقل من 12 سنة</em></p>
+    <div class="service" data-price="14" data-dur="25"><div class="emoji">&#9986;</div><div class="info"><b>قصّة شعر للطفل</b><span>25 دقيقة</span></div><div class="price">14 &euro;</div></div>
+    <div class="service" data-price="10" data-dur="20"><div class="emoji">&#128118;</div><div class="info"><b>أول قصّة شعر</b><span>مع صورة تذكارية &middot; هدية صغيرة</span></div><div class="price">10 &euro;</div></div>
+    <div class="service" data-price="18" data-dur="35"><div class="emoji">&#127912;</div><div class="info"><b>قصّة بتصميم (Design)</b><span>35 دقيقة &middot; خطوط ورسومات</span></div><div class="price">18 &euro;</div></div>
+    <div class="service" data-price="25" data-dur="50"><div class="emoji">&#128106;</div><div class="info"><b>الأب + الابن</b><span>قصّتان في نفس الموعد</span></div><div class="price">25 &euro;</div></div>
+  </section>
+
+  <div class="book-bar">
+    <button class="btn" id="bookBtn" disabled>اختر خدمة للحجز</button>
+  </div>
+
+  <p class="note" id="storageNote">
+    تنبيه: هذه المعاينة تمنع الحفظ في الجهاز، فالمواعيد لن تبقى بعد الإغلاق.
+    داخل تطبيق Android الحقيقي يعمل الحفظ بشكل طبيعي.
+  </p>
+</div>
+
+<!-- شاشة اختيار اليوم والساعة -->
+<div class="screen" id="bookingScreen">
+  <div class="screen-inner">
+    <div class="screen-head">
+      <button class="back" id="backBtn">&#8594;</button>
+      <h2>اختر الموعد</h2>
+    </div>
+    <div class="recap">
+      <div class="emoji" id="rcEmoji">&#9986;</div>
+      <div><b id="rcName">&mdash;</b><span id="rcMeta">&mdash;</span></div>
+      <div class="price" id="rcPrice">&mdash;</div>
+    </div>
+    <p class="section-label">اليوم</p>
+    <div class="days" id="days"></div>
+    <p class="section-label">الساعة</p>
+    <div class="slots" id="slots"></div>
+    <p class="slots-empty" id="slotsEmpty" hidden>اختر يوماً أولاً</p>
+    <p class="section-label">معلوماتك</p>
+    <div class="field">
+      <label for="cName">الاسم الكامل</label>
+      <input id="cName" type="text" placeholder="مثال: كريم بن علي" autocomplete="name">
+    </div>
+    <div class="field">
+      <label for="cPhone">رقم الهاتف</label>
+      <input id="cPhone" type="tel" placeholder="06 12 34 56 78" autocomplete="tel">
+    </div>
+    <button class="btn" id="confirmBtn" disabled style="margin-top:8px">أكّد الحجز</button>
+  </div>
+</div>
+
+<!-- شاشة التأكيد -->
+<div class="screen" id="doneScreen">
+  <div class="screen-inner">
+    <div class="done">
+      <div class="check">&#10003;</div>
+      <h3>تم تأكيد حجزك</h3>
+      <p id="doneMsg">حُفظ الموعد، ننتظرك في الصالون!</p>
+      <div class="ticket" id="ticket"></div>
+      <button class="btn btn-wa" id="waBtn">أرسل التأكيد عبر واتساب</button>
+      <button class="btn btn-ghost" id="closeDone">العودة للرئيسية</button>
+    </div>
+  </div>
+</div>
+
+<!-- لوحة تحكم صاحب الصالون -->
+<div class="screen" id="adminScreen">
+  <div class="screen-inner">
+    <div class="screen-head">
+      <button class="back" id="adminBack">&#8594;</button>
+      <h2>لوحة الحجوزات</h2>
+      <button class="back spacer" id="adminRefresh" title="تحديث">&#8635;</button>
+    </div>
+    <div class="admin-stats">
+      <div class="astat"><b id="stToday">0</b><span>اليوم</span></div>
+      <div class="astat"><b id="stWeek">0</b><span>هذا الأسبوع</span></div>
+      <div class="astat"><b id="stRevenue">0 &euro;</b><span>المداخيل المتوقعة</span></div>
+    </div>
+    <div id="adminList"></div>
+  </div>
+</div>
+
+<script>
+/* ==================== إعدادات الصالون ==================== */
+var SALON_PHONE = '33758579175';      // رقم واتساب الصالون (07 58 57 91 75)
+var CLOSED_DAYS = [0];                // 0 = الأحد مغلق
+var OPEN_HOUR   = 9, CLOSE_HOUR = 20;
+var STEP_MIN    = 30;
+var ADMIN_PIN   = '1994dj';           // رمز دخول لوحة التحكم
+
+/* ==================== إعدادات Firebase ====================
+   1) أنشئ مشروعاً على console.firebase.google.com
+   2) Build > Firestore Database > Create database
+   3) Project settings > General > انسخ projectId و apiKey (Web API Key)
+   4) ضعهما هنا. إن تركتهما فارغين يعمل التطبيق محلياً فقط.        */
+var FB_PROJECT_ID = 'djilali-coiffeur-pro';   // معرّف مشروعك في Firebase
+var FB_API_KEY    = '';               // مثال: 'AIzaSy...'
+var FB_COLLECTION = 'bookings';
+/* ========================================================= */
+
+var STORE_KEY = 'djc_bookings_v2', CLIENT_KEY = 'djc_client_v1', DEVICE_KEY = 'djc_device_v1';
+var DAY_NAMES = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+var MONTHS = ['جانفي','فيفري','مارس','أفريل','ماي','جوان','جويلية','أوت','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+
+var CLOUD = !!(FB_PROJECT_ID && FB_API_KEY);
+var FB_BASE = 'https://firestore.googleapis.com/v1/projects/' + FB_PROJECT_ID +
+              '/databases/(default)/documents';
+
+/* ---------- التخزين في الجهاز ---------- */
+var storageOK = true;
+function loadJSON(k, f){ try{ var r = localStorage.getItem(k); return r ? JSON.parse(r) : f; }
+                         catch(e){ storageOK = false; return f; } }
+function saveJSON(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); return true; }
+                         catch(e){ storageOK = false; return false; } }
+
+var myBookings = loadJSON(STORE_KEY, []);   // حجوزات هذا الجهاز
+var allBookings = [];                       // كل الحجوزات (من السحابة) لحساب المواعيد المشغولة
+var client = loadJSON(CLIENT_KEY, {});
+var deviceId = loadJSON(DEVICE_KEY, null);
+if (!deviceId){ deviceId = 'd' + Date.now() + Math.random().toString(36).slice(2,8); saveJSON(DEVICE_KEY, deviceId); }
+
+function iso(d){ return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
+function todayISO(){ return iso(new Date()); }
+function prettyDate(s){
+  var p = s.split('-'); var d = new Date(Number(p[0]), Number(p[1])-1, Number(p[2]));
+  return DAY_NAMES[d.getDay()] + ' ' + d.getDate() + ' ' + MONTHS[d.getMonth()];
+}
+
+/* حذف المواعيد القديمة من الجهاز */
+(function pruneOld(){
+  var t = todayISO(), n = myBookings.length;
+  myBookings = myBookings.filter(function(b){ return b.date >= t; });
+  if (myBookings.length !== n) saveJSON(STORE_KEY, myBookings);
+})();
+allBookings = myBookings.slice();
+
+/* ---------- Firestore عبر REST (بدون أي مكتبة خارجية) ---------- */
+function toFields(o){
+  var f = {};
+  Object.keys(o).forEach(function(k){ f[k] = { stringValue: String(o[k]) }; });
+  return { fields: f };
+}
+function fromDoc(doc){
+  var o = { _name: doc.name };
+  Object.keys(doc.fields || {}).forEach(function(k){
+    var v = doc.fields[k];
+    o[k] = v.stringValue !== undefined ? v.stringValue : (v.integerValue || '');
+  });
+  return o;
+}
+function cloudCreate(b){
+  return fetch(FB_BASE + '/' + FB_COLLECTION + '?key=' + FB_API_KEY, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify(toFields({
+      service:b.service, category:b.category, price:b.price, dur:b.dur,
+      date:b.date, time:b.time, name:b.name, phone:b.phone, device:deviceId
+    }))
+  }).then(function(r){ if(!r.ok) throw new Error('create failed'); return r.json(); });
+}
+function cloudList(){
+  return fetch('https://firestore.googleapis.com/v1/projects/' + FB_PROJECT_ID +
+               '/databases/(default)/documents:runQuery?key=' + FB_API_KEY, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ structuredQuery:{
+      from:[{collectionId:FB_COLLECTION}],
+      where:{fieldFilter:{field:{fieldPath:'date'}, op:'GREATER_THAN_OR_EQUAL',
+                          value:{stringValue: todayISO()}}},
+      orderBy:[{field:{fieldPath:'date'}, direction:'ASCENDING'}]
+    }})
+  }).then(function(r){ if(!r.ok) throw new Error('list failed'); return r.json(); })
+    .then(function(rows){
+      return (rows || []).filter(function(x){ return x.document; }).map(function(x){ return fromDoc(x.document); });
+    });
+}
+function cloudDelete(name){
+  return fetch('https://firestore.googleapis.com/v1/' + name + '?key=' + FB_API_KEY, { method:'DELETE' });
+}
+
+function setSync(state, text){
+  var pill = document.getElementById('syncPill');
+  pill.className = 'sync ' + state;
+  document.getElementById('syncTxt').textContent = text;
+}
+
+/* مزامنة: يقرأ السحابة ويرفع الحجوزات المعلّقة */
+function sync(){
+  if (!CLOUD){ setSync('', 'محلي فقط'); return Promise.resolve(); }
+  setSync('', 'جاري المزامنة...');
+  var pending = myBookings.filter(function(b){ return !b.synced; });
+  return Promise.all(pending.map(function(b){
+      return cloudCreate(b).then(function(doc){ b.synced = true; b._name = doc.name; })
+                           .catch(function(){});
+    }))
+    .then(function(){ saveJSON(STORE_KEY, myBookings); return cloudList(); })
+    .then(function(list){
+      allBookings = list;
+      // اربط حجوزات هذا الجهاز بنسخها السحابية
+      myBookings.forEach(function(mine){
+        var m = list.find(function(x){ return x.date === mine.date && x.time === mine.time && x.device === deviceId; });
+        if (m){ mine._name = m._name; mine.synced = true; }
+      });
+      saveJSON(STORE_KEY, myBookings);
+      setSync('on', 'متصل بالسحابة');
+      renderMyBookings();
+    })
+    .catch(function(){
+      allBookings = myBookings.slice();
+      setSync('off', 'بدون اتصال');
+      renderMyBookings();
+    });
+}
+
+function isTaken(date, time){
+  return allBookings.some(function(b){ return b.date === date && b.time === time; }) ||
+         myBookings.some(function(b){ return b.date === date && b.time === time; });
+}
+
+/* ---------- مواعيدي ---------- */
+function renderMyBookings(){
+  var wrap = document.getElementById('myBookings'), list = document.getElementById('bkList');
+  if (!myBookings.length){ wrap.hidden = true; return; }
+  wrap.hidden = false;
+  list.innerHTML = '';
+  myBookings.slice().sort(function(a,b){ return (a.date+a.time).localeCompare(b.date+b.time); })
+  .forEach(function(b){
+    var p = b.date.split('-');
+    var row = document.createElement('div');
+    row.className = 'bk' + (CLOUD && !b.synced ? ' pending' : '');
+    row.innerHTML =
+      '<div class="when"><b>' + Number(p[2]) + '</b><small>' + MONTHS[Number(p[1])-1] + '</small></div>' +
+      '<div class="txt"><b>' + b.service + '</b><span>' + prettyDate(b.date) + ' &middot; ' + b.time +
+      ' &middot; ' + b.price + ' €' + (CLOUD && !b.synced ? ' &middot; <i class="badge">لم يُرسل بعد</i>' : '') +
+      '</span></div><button class="cancel">إلغاء</button>';
+    row.querySelector('.cancel').addEventListener('click', function(){
+      if (!confirm('إلغاء موعد ' + b.service + ' يوم ' + prettyDate(b.date) + ' على ' + b.time + '؟')) return;
+      myBookings = myBookings.filter(function(x){ return x.id !== b.id; });
+      allBookings = allBookings.filter(function(x){ return x._name !== b._name; });
+      saveJSON(STORE_KEY, myBookings);
+      if (CLOUD && b._name) cloudDelete(b._name).catch(function(){});
+      renderMyBookings();
+    });
+    list.appendChild(row);
+  });
+}
+
+/* ---------- الخانتان واختيار الخدمة ---------- */
+var tabs = document.querySelectorAll('.tab'), panels = document.querySelectorAll('.panel');
+var bookBtn = document.getElementById('bookBtn');
+var picked = null, pickedDate = null, pickedTime = null;
+
+function resetSelection(){
+  document.querySelectorAll('.service.selected').forEach(function(s){ s.classList.remove('selected'); });
+  picked = null; bookBtn.disabled = true; bookBtn.textContent = 'اختر خدمة للحجز';
+}
+tabs.forEach(function(tab){
+  tab.addEventListener('click', function(){
+    tabs.forEach(function(t){ t.setAttribute('aria-selected','false'); });
+    tab.setAttribute('aria-selected','true');
+    panels.forEach(function(p){ p.hidden = (p.id !== tab.getAttribute('aria-controls')); });
+    resetSelection();
+  });
+});
+document.querySelectorAll('.service').forEach(function(card){
+  card.addEventListener('click', function(){
+    var was = card.classList.contains('selected');
+    resetSelection();
+    if (was) return;
+    card.classList.add('selected');
+    picked = {
+      name: card.querySelector('.info b').textContent,
+      emoji: card.querySelector('.emoji').innerHTML,
+      price: card.dataset.price, dur: card.dataset.dur,
+      category: document.querySelector('.tab[aria-selected="true"]').textContent.trim()
+    };
+    bookBtn.disabled = false;
+    bookBtn.textContent = 'احجز: ' + picked.name + ' – ' + picked.price + ' €';
+  });
+});
+
+/* ---------- شاشة الحجز ---------- */
+var screenBooking = document.getElementById('bookingScreen');
+var screenDone = document.getElementById('doneScreen');
+var screenAdmin = document.getElementById('adminScreen');
+var cName = document.getElementById('cName'), cPhone = document.getElementById('cPhone');
+var confirmBtn = document.getElementById('confirmBtn');
+
+bookBtn.addEventListener('click', function(){
+  if (!picked) return;
+  document.getElementById('rcEmoji').innerHTML = picked.emoji;
+  document.getElementById('rcName').textContent = picked.name;
+  document.getElementById('rcMeta').textContent = picked.category + ' · ' + picked.dur + ' دقيقة';
+  document.getElementById('rcPrice').textContent = picked.price + ' €';
+  pickedDate = null; pickedTime = null;
+  cName.value = client.name || ''; cPhone.value = client.phone || '';
+  buildDays(); renderSlots(); checkConfirm();
+  screenBooking.classList.add('open'); window.scrollTo(0,0);
+  if (CLOUD) sync().then(renderSlots);
+});
+document.getElementById('backBtn').addEventListener('click', function(){
+  screenBooking.classList.remove('open');
+});
+
+function buildDays(){
+  var wrap = document.getElementById('days'); wrap.innerHTML = '';
+  var today = new Date();
+  for (var i = 0; i < 14; i++){
+    var d = new Date(today.getFullYear(), today.getMonth(), today.getDate() + i);
+    var closed = CLOSED_DAYS.indexOf(d.getDay()) !== -1;
+    var el = document.createElement('button');
+    el.className = 'day' + (closed ? ' closed' : '');
+    el.dataset.date = iso(d);
+    el.innerHTML = '<small>' + (i === 0 ? 'اليوم' : DAY_NAMES[d.getDay()]) + '</small><b>' + d.getDate() +
+                   '</b><i>' + (closed ? 'مغلق' : MONTHS[d.getMonth()]) + '</i>';
+    if (!closed){
+      el.addEventListener('click', function(){
+        document.querySelectorAll('.day.selected').forEach(function(x){ x.classList.remove('selected'); });
+        this.classList.add('selected');
+        pickedDate = this.dataset.date; pickedTime = null;
+        renderSlots(); checkConfirm();
+      });
+    }
+    wrap.appendChild(el);
+  }
+}
+function renderSlots(){
+  var grid = document.getElementById('slots'), empty = document.getElementById('slotsEmpty');
+  grid.innerHTML = '';
+  if (!pickedDate){ empty.hidden = false; return; }
+  empty.hidden = true;
+  var now = new Date(), isToday = pickedDate === iso(now);
+  for (var m = OPEN_HOUR*60; m + Number(picked.dur) <= CLOSE_HOUR*60; m += STEP_MIN){
+    var t = String(Math.floor(m/60)).padStart(2,'0') + ':' + String(m%60).padStart(2,'0');
+    var past = isToday && m <= now.getHours()*60 + now.getMinutes();
+    var busy = isTaken(pickedDate, t) || past;
+    var el = document.createElement('button');
+    el.className = 'slot' + (busy ? ' taken' : '');
+    el.textContent = t;
+    if (t === pickedTime) el.classList.add('selected');
+    if (!busy){
+      el.addEventListener('click', function(){
+        document.querySelectorAll('.slot.selected').forEach(function(x){ x.classList.remove('selected'); });
+        this.classList.add('selected'); pickedTime = this.textContent; checkConfirm();
+      });
+    }
+    grid.appendChild(el);
+  }
+}
+function checkConfirm(){
+  confirmBtn.disabled = !(pickedDate && pickedTime && cName.value.trim().length > 1 && cPhone.value.trim().length > 5);
+}
+cName.addEventListener('input', checkConfirm);
+cPhone.addEventListener('input', checkConfirm);
+
+confirmBtn.addEventListener('click', function(){
+  var booking = {
+    id: Date.now(), service: picked.name, category: picked.category,
+    price: picked.price, dur: picked.dur, date: pickedDate, time: pickedTime,
+    name: cName.value.trim(), phone: cPhone.value.trim(), synced: false
+  };
+  myBookings.push(booking);
+  var saved = saveJSON(STORE_KEY, myBookings);
+  client = { name: booking.name, phone: booking.phone };
+  saveJSON(CLIENT_KEY, client);
+  document.getElementById('storageNote').classList.toggle('show', !saved);
+
+  var rows = [['الخدمة',booking.service],['الخانة',booking.category],['التاريخ',prettyDate(booking.date)],
+              ['الساعة',booking.time],['المدة',booking.dur+' دقيقة'],['الاسم',booking.name],
+              ['الهاتف',booking.phone],['السعر',booking.price+' €']];
+  var html = '';
+  rows.forEach(function(r){ html += '<div><span>' + r[0] + '</span><b>' + r[1] + '</b></div>'; });
+  document.getElementById('ticket').innerHTML = html;
+
+  var msg = 'حجز جديد - DJ Coiffeur\n' + 'الخدمة: ' + booking.service + ' (' + booking.category + ')\n' +
+            'التاريخ: ' + prettyDate(booking.date) + ' على الساعة ' + booking.time + '\n' +
+            'الاسم: ' + booking.name + '\n' + 'الهاتف: ' + booking.phone + '\n' +
+            'السعر: ' + booking.price + ' EUR';
+  document.getElementById('waBtn').dataset.url = 'https://wa.me/' + SALON_PHONE + '?text=' + encodeURIComponent(msg);
+
+  var doneMsg = document.getElementById('doneMsg');
+  if (CLOUD){
+    doneMsg.textContent = 'جاري إرسال الحجز إلى الصالون...';
+    cloudCreate(booking)
+      .then(function(doc){
+        booking.synced = true; booking._name = doc.name;
+        saveJSON(STORE_KEY, myBookings);
+        allBookings.push({date:booking.date, time:booking.time, _name:doc.name});
+        doneMsg.textContent = 'وصل حجزك إلى الصالون، ننتظرك!';
+        renderMyBookings();
+      })
+      .catch(function(){
+        doneMsg.textContent = 'حُفظ الموعد في جهازك وسيُرسل تلقائياً عند عودة الإنترنت.';
+      });
+  } else {
+    doneMsg.textContent = 'حُفظ الموعد في جهازك، ننتظرك في الصالون!';
+  }
+
+  renderMyBookings();
+  screenBooking.classList.remove('open');
+  screenDone.classList.add('open');
+  window.scrollTo(0,0);
+});
+document.getElementById('waBtn').addEventListener('click', function(){ window.open(this.dataset.url, '_blank'); });
+document.getElementById('closeDone').addEventListener('click', function(){
+  screenDone.classList.remove('open'); resetSelection();
+});
+
+/* ---------- زر التواصل على واتساب ---------- */
+document.getElementById('contactWa').addEventListener('click', function(){
+  var msg = 'السلام عليكم، لدي سؤال بخصوص صالون DJ Coiffeur';
+  window.open('https://wa.me/' + SALON_PHONE + '?text=' + encodeURIComponent(msg), '_blank');
+});
+
+/* ---------- لوحة تحكم صاحب الصالون ---------- */
+var tapCount = 0, tapTimer = null;
+document.getElementById('avatarWrap').addEventListener('click', function(){
+  tapCount++;
+  clearTimeout(tapTimer);
+  tapTimer = setTimeout(function(){ tapCount = 0; }, 1200);
+  if (tapCount >= 5){
+    tapCount = 0;
+    var pin = prompt('رمز الدخول للوحة التحكم:');
+    if (pin === ADMIN_PIN) openAdmin();
+    else if (pin !== null) alert('رمز خاطئ');
+  }
+});
+function openAdmin(){
+  screenAdmin.classList.add('open');
+  window.scrollTo(0,0);
+  loadAdmin();
+}
+document.getElementById('adminBack').addEventListener('click', function(){ screenAdmin.classList.remove('open'); });
+document.getElementById('adminRefresh').addEventListener('click', loadAdmin);
+
+function loadAdmin(){
+  var list = document.getElementById('adminList');
+  list.innerHTML = '<p class="empty">جاري التحميل...</p>';
+  var p = CLOUD ? cloudList() : Promise.resolve(myBookings.slice());
+  p.then(renderAdmin).catch(function(){
+    list.innerHTML = '<p class="empty">تعذّر الاتصال. تحقق من الإنترنت أو من إعدادات Firebase.</p>';
+  });
+}
+function renderAdmin(rows){
+  var list = document.getElementById('adminList');
+  list.innerHTML = '';
+  if (!rows.length){ list.innerHTML = '<p class="empty">لا توجد حجوزات قادمة.</p>'; }
+
+  var t = todayISO();
+  var weekEnd = new Date(); weekEnd.setDate(weekEnd.getDate() + 7); weekEnd = iso(weekEnd);
+  var nToday = 0, nWeek = 0, revenue = 0;
+  rows.forEach(function(b){
+    if (b.date === t) nToday++;
+    if (b.date >= t && b.date <= weekEnd){ nWeek++; revenue += Number(b.price || 0); }
+  });
+  document.getElementById('stToday').textContent   = nToday;
+  document.getElementById('stWeek').textContent    = nWeek;
+  document.getElementById('stRevenue').textContent = revenue + ' €';
+
+  var byDate = {};
+  rows.forEach(function(b){ (byDate[b.date] = byDate[b.date] || []).push(b); });
+  Object.keys(byDate).sort().forEach(function(date){
+    var g = document.createElement('div');
+    g.className = 'daygroup';
+    g.innerHTML = '<h4>' + prettyDate(date) + (date === t ? ' &mdash; اليوم' : '') + '</h4>';
+    byDate[date].sort(function(a,b){ return a.time.localeCompare(b.time); }).forEach(function(b){
+      var row = document.createElement('div');
+      row.className = 'arow';
+      row.innerHTML = '<div class="t">' + b.time + '</div>' +
+        '<div class="d"><b>' + b.name + ' &middot; ' + b.service + '</b>' +
+        '<span>' + b.category + ' &middot; ' + b.phone + ' &middot; ' + b.price + ' €</span></div>' +
+        '<button class="call">اتصال</button><button class="del">&#10005;</button>';
+      row.querySelector('.call').addEventListener('click', function(){
+        window.open('tel:' + String(b.phone).replace(/\s/g,''), '_self');
+      });
+      row.querySelector('.del').addEventListener('click', function(){
+        if (!confirm('حذف حجز ' + b.name + ' (' + b.time + ')؟')) return;
+        if (CLOUD && b._name) cloudDelete(b._name).then(loadAdmin).catch(function(){ alert('تعذّر الحذف'); });
+        else { myBookings = myBookings.filter(function(x){ return x.id !== b.id; });
+               saveJSON(STORE_KEY, myBookings); renderMyBookings(); loadAdmin(); }
+      });
+      g.appendChild(row);
+    });
+    list.appendChild(g);
+  });
+}
+
+/* ---------- البداية ---------- */
+renderMyBookings();
+if (!storageOK) document.getElementById('storageNote').classList.add('show');
+sync();
+</script>
+</body>
+</html>
+
